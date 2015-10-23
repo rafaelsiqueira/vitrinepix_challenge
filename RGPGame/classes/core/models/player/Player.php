@@ -79,13 +79,21 @@ abstract class Player {
 
     public function defense()
     {
+        return Dice::next(range(1, 20)) + $this->getVelocity() + $this->getWeapon()->getDefense();
     }
 
     public function attack(Player $defensor)
     {
+        $dice = Dice::next(range(1, 20));
+        $attack = $dice + $this->getVelocity() + $this->getWeapon()->getStrikForce();
+
+        return $attack > $defensor->defense();
     }
 
     public function makeDamage(Weapon $weapon)
     {
+        $damage = Dice::next($weapon->getDamage()) + $weapon->getStrikForce();
+        $health = $this->getHealth() - $damage;
+        $this->setHealth($health);
     }
 }
