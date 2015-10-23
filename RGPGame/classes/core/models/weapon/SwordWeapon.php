@@ -1,5 +1,5 @@
 <?php
-namespace core\weapon;
+namespace core\models\weapon;
 
 class SwordWeapon extends Weapon {
 }

@@ -1,14 +1,14 @@
 <?php
-namespace core\player;
+namespace core\models\player;
 
-use core\weapon\Weapon;
+use core\models\weapon\Weapon;
 use util\Dice;
 
 abstract class Player {
 
     private $health;
     private $strength;
-    private $velocity;
+    private $agility;
 
     /**
      * @var For the challenge propose, i'm considering 1:1 relation between Player/Weapon
@@ -48,17 +48,17 @@ abstract class Player {
     /**
      * @return mixed
      */
-    public function getVelocity()
+    public function getAgility()
     {
-        return $this->velocity;
+        return $this->agility;
     }
 
     /**
-     * @param mixed $velocity
+     * @param mixed $agility
      */
-    public function setVelocity($velocity)
+    public function setAgility($agility)
     {
-        $this->velocity = $velocity;
+        $this->agility = agility;
     }
 
     /**
@@ -70,7 +70,7 @@ abstract class Player {
     }
 
     /**
-     * @param For $weapon
+     * @param Weapon $weapon
      */
     public function setWeapon(Weapon $weapon)
     {
@@ -79,20 +79,20 @@ abstract class Player {
 
     public function defense()
     {
-        return Dice::next(range(1, 20)) + $this->getVelocity() + $this->getWeapon()->getDefense();
+        return Dice::next(range(1, 20)) + $this->getAgility() + $this->getWeapon()->getDefense();
     }
 
     public function attack(Player $defensor)
     {
         $dice = Dice::next(range(1, 20));
-        $attack = $dice + $this->getVelocity() + $this->getWeapon()->getStrikForce();
+        $attack = $dice + $this->getAgility() + $this->getWeapon()->getStrikeForce();
 
         return $attack > $defensor->defense();
     }
 
     public function makeDamage(Weapon $weapon)
     {
-        $damage = Dice::next($weapon->getDamage()) + $weapon->getStrikForce();
+        $damage = Dice::next($weapon->getDamage()) + $weapon->getStrikeForce();
         $health = $this->getHealth() - $damage;
         $this->setHealth($health);
     }

@@ -1,26 +1,26 @@
 <?php
-namespace core\weapon;
+namespace core\models\weapon;
 
 class Weapon {
 
-    private $strikForce;
+    private $strikeForce;
     private $defense;
     private $damage;
 
     /**
      * @return mixed
      */
-    public function getStrikForce()
+    public function getStrikeForce()
     {
-        return $this->strikForce;
+        return $this->strikeForce;
     }
 
     /**
-     * @param mixed $strikForce
+     * @param mixed $strikeForce
      */
-    public function setStrikForce($strikForce)
+    public function setStrikeForce($strikeForce)
     {
-        $this->strikForce = $strikForce;
+        $this->strikeForce = $strikeForce;
     }
 
     /**
