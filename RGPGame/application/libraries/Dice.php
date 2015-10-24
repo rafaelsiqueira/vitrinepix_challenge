@@ -8,7 +8,7 @@ final class Dice {
     }
 
     public final function next($range) {
-        static::nextStatic($range);
+        return static::nextStatic($range);
     }
 
 }

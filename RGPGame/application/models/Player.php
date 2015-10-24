@@ -2,6 +2,7 @@
 
 class Player extends Custom_Model {
 
+    private $name;
     private $health;
     private $strength;
     private $agility;
@@ -26,6 +27,22 @@ class Player extends Custom_Model {
 
         return $this->db->query($q)->result();
 
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * @param mixed $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
     }
 
     public function isHealthy() {
@@ -104,9 +121,15 @@ class Player extends Custom_Model {
     public function attack(Player $defensor)
     {
         $dice = Dice::nextStatic(range(1, 20));
-        $attack = $dice + $this->getAgility() + $this->getWeapon()->getStrikeForce();
 
-        return $attack > $defensor->defense();
+        $attack  = $dice + $this->getAgility() + $this->getWeapon()->getStrikeForce();
+        $defense = $defensor->defense();
+
+        return [
+            'success' => ($attack > $defense),
+            'attack_points' => $attack,
+            'defense_points' => $defense
+        ];
     }
 
     public function makeDamage(Weapon $weapon)
@@ -114,5 +137,10 @@ class Player extends Custom_Model {
         $damage = Dice::nextStatic($weapon->getDamageRange()) + $weapon->getStrikeForce();
         $health = $this->getHealth() - $damage;
         $this->setHealth($health);
+
+        return [
+            'damage' => $damage,
+            'remaining_health' => $health
+        ];
     }
 }

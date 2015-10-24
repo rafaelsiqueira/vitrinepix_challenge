@@ -22,17 +22,18 @@ class Game extends Custom_Controller {
     {
         // load resources
         $this->load->model('player', '', true);
+        $players = $this->player->list_available_players();
 
         do {
             $initiatives = array();
 
             // loop through the players and determine the attack order
-            $players = $this->player->list_available_players();
             foreach($players as $player) {
 
                 // keep the initiative number to use later
                 $initiative = $this->dice->next(range(1,20)) + $player->agility;
                 $initiatives[$initiative] = $player;
+
             }
 
         } while (sizeof($initiatives) == 1);
@@ -43,10 +44,9 @@ class Game extends Custom_Controller {
         $second = $initiatives[ min($sortedNumbers) ];
 
         // save ordered players in session
-        $players = ['players' => array($first, $second)];
-        $this->session->gamedata = $players;
+        $this->session->gamedata = ['players' => array($first, $second)];
 
-        print json_encode($players['players']);
+        print json_encode($this->session->gamedata['players']);
     }
 
     public function attack()
@@ -63,16 +63,37 @@ class Game extends Custom_Controller {
 
         do {
 
+            // prepare round data
+            $round = [
+                'attacker' => $players[$current_attacker]->getName(),
+                'defender' => $players[$current_defender]->getName(),
+                'attack' => [
+                    'remaining_health' => $players[$current_defender]->getHealth()
+                ]
+            ];
+
             // if the attack was successful
-            if ($players[$current_attacker]->attack($players[$current_defender])) {
+            $attack = $players[$current_attacker]->attack($players[$current_defender]);
+
+            $round['attack']['success'] = $attack['success'];
+            $round['attack']['attack_points'] = $attack['attack_points'];
+            $round['attack']['defense_points'] = $attack['defense_points'];
+
+            if ($attack['success']) {
 
                 // calculate the damage...
-                $players[$current_defender]->makeDamage($players[$current_attacker]->getWeapon());
+                $damage = $players[$current_defender]->makeDamage($players[$current_attacker]->getWeapon());
+
+                $round['attack']['damage'] = $damage['damage'];
+                $round['attack']['remaining_health'] = $damage['remaining_health'];
 
                 // and check if the opponent is dead
                 if (!$players[$current_defender]->isHealthy()) {
 
                     // if so, the player is the winner!
+                    $round['attack']['is_defender_dead'] = true;
+                    $rounds[] = $round;
+
                     break;
                 }
             }
@@ -81,14 +102,18 @@ class Game extends Custom_Controller {
             $current_attacker = (int) !$current_attacker;
             $current_defender = (int) !$current_defender;
 
+            // add to round's list
+            $rounds[] = $round;
+
         } while ($players[$current_attacker]->isHealthy() && $players[$current_defender]->isHealthy());
+
+        print json_encode($rounds);
     }
 
     private function prepareNewGame()
     {
         // cleanup game session
         $this->session->gamedata = array();
-
     }
 
     private function preparePlayers()
@@ -109,6 +134,7 @@ class Game extends Custom_Controller {
 
             $player = new Player();
             $player->setData([
+                'name' => $p->player_name,
                 'health' => $p->health,
                 'strength' => $p->strength,
                 'agility' => $p->agility,

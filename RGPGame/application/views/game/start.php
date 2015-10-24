@@ -25,9 +25,28 @@
             <h3 class="panel-title">Game Play</h3>
         </div>
         <div class="panel-body">
-            <span id="attack-tip">Waiting for the initiative step</span>
-            <div id="attack-container" style="background: red">
+            <div id="attack-tip">
+                Waiting for the initiative step
+            </div>
+            <div id="attack-container">
                 <button style="display: none" id="attack-step-start" type="button" class="col-lg-12 btn btn-danger">Attack</button>
+
+                <div id="results-container" style="display: none;">
+                    <table id="results-table" class="table">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Attacker</th>
+                            <th>Defender</th>
+                            <th>Attack Points</th>
+                            <th>Defense Points</th>
+                            <th>Damage</th>
+                            <th>Health (defender)</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <button id="new-game" type="button" class="col-lg-12 btn btn-primary">New Game!</button>
+                </div>
             </div>
         </div>
     </div>
