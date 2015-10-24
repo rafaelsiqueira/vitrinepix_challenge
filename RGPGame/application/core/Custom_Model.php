@@ -12,4 +12,10 @@ class Custom_Model extends CI_Model {
             $this->{'set' . ucfirst($key)}($value);
         }
     }
+
+    public function update($id, $data) {
+        $this->db->where('id', $id);
+        return $this->db->update(strtolower(get_class($this)), $data);
+    }
+
 }

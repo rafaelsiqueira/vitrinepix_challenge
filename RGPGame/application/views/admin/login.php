@@ -3,7 +3,7 @@
             <li class="active">Admin</li>
         </ol>
 
-        <form class="form-signin" action="/game/admin_login" method="post">
+        <form class="form-signin" action="/admin/login" method="post">
             <?php if(isset($message)): ?>
                 <div class="alert alert-danger" role="alert">
                     <?php echo $message ?>

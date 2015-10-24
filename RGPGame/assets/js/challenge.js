@@ -67,14 +67,35 @@
 
         this.updatePlayer = function(e) {
             var playerId = $(e.target).data('item');
-            console.log('Updating id = ' + playerId);
+            _update('player', playerId);
         };
 
         this.updateWeapon = function(e) {
             var weaponId = $(e.target).data('item');
-            console.log('Updating id = ' + weaponId);
+            _update('weapon', weaponId);
         };
 
+        function _update(item, itemId) {
+
+            var payload  = [];
+            $('#form-'+ item +' input[name^='+ item +'\\['+ itemId + '\\]]').each(function(i, el){
+                payload.push($(el).attr('name') + '=' + $(el).val());
+            });
+
+            var request = $.post('/admin/update_' + item, payload.join('&'), null, 'json');
+            request.done(function(data){
+                console.log(data);
+                if(data.success) {
+                    $('#message-box').html('<div class="alert alert-success" role="alert">Update success!</div>');
+                } else {
+                    $('#message-box').html('<div class="alert alert-danger" role="alert">'+ data.message +'</div>');
+                }
+            });
+
+            request.fail(function(){
+                $('#message-box').html('<div class="alert alert-danger" role="alert">Internal server error!</div>');
+            });
+        }
     };
 
     $(function(){
