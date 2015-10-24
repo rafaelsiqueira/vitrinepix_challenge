@@ -9,7 +9,7 @@
                 // update players list
                 $('#players-list').html('');
                 for(var i in players) {
-                    order = '#' + (parseInt(i) + parseInt(1));
+                    order = players[i].initiative_point;
                     $('#players-list').append(
                         '<li class="list-group-item">'+ players[i].player_name +'<span class="badge">'+ order +'</span></li>'
                     );
@@ -57,14 +57,28 @@
                 }
 
                 $('#attack-tip').append('<div class="alert alert-info" role="alert">The "'+ results[ results.length-1].attacker +'" wins!</div>')
-
                 $('#results-container').show();
 
             }, 'json');
         };
     };
 
+    var Admin = function() {
+
+        this.updatePlayer = function(e) {
+            var playerId = $(e.target).data('item');
+            console.log('Updating id = ' + playerId);
+        };
+
+        this.updateWeapon = function(e) {
+            var weaponId = $(e.target).data('item');
+            console.log('Updating id = ' + weaponId);
+        };
+
+    };
+
     $(function(){
+
         var game = new Game();
 
         // add events
@@ -74,6 +88,24 @@
             window.location.reload();
         });
 
+        // admin
+        if(window.location.pathname.indexOf('/admin') != -1) {
+            $('#inputPassword').focus();
+
+            var admin = new Admin();
+
+            if($('#available-players').length > 0) {
+                $('#available-players button').each(function(index, elem){
+                    $(elem).click(admin.updatePlayer);
+                });
+            }
+
+            if($('#available-weapons').length > 0) {
+                $('#available-weapons button').each(function(index, elem){
+                    $(elem).click(admin.updateWeapon);
+                });
+            }
+        }
     });
 
 })(jQuery);

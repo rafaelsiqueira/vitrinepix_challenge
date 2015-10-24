@@ -32,8 +32,9 @@ class Game extends Custom_Controller {
 
                 // keep the initiative number to use later
                 $initiative = $this->dice->next(range(1,20)) + $player->agility;
-                $initiatives[$initiative] = $player;
 
+                $player->initiative_point = $initiative;
+                $initiatives[$initiative] = $player;
             }
 
         } while (sizeof($initiatives) == 1);
@@ -72,13 +73,13 @@ class Game extends Custom_Controller {
                 ]
             ];
 
-            // if the attack was successful
             $attack = $players[$current_attacker]->attack($players[$current_defender]);
 
             $round['attack']['success'] = $attack['success'];
             $round['attack']['attack_points'] = $attack['attack_points'];
             $round['attack']['defense_points'] = $attack['defense_points'];
 
+            // if the attack was successful
             if ($attack['success']) {
 
                 // calculate the damage...
@@ -147,10 +148,64 @@ class Game extends Custom_Controller {
         return $players;
     }
 
-    public function admin()
+    public function admin_login()
     {
-        $this->render('game/admin');
+        $data = array();
 
+        if (!isset($this->session->admin)) {
+            $this->session->admin = ['authenticated' => false];
+
+        } else {
+            if ($this->session->admin['authenticated']) {
+                header('Location: /admin');
+                return;
+            }
+        }
+
+        $typed_password = $this->input->post('password');
+        if(!empty($typed_password)) {
+
+            if($typed_password == '1234') {
+                $this->session->admin = ['authenticated' => true];
+                header('Location: /game/admin');
+
+            } else {
+                $data['message'] = 'Invalid password';
+            }
+        }
+
+        $this->render('game/admin/login', $data);
     }
 
+    public function admin()
+    {
+        if (!isset($this->session->admin['authenticated'])) {
+            $this->render('game/admin/login');
+            return;
+        }
+
+        // list available players
+        $this->load->model('player', '', true);
+        $players = $this->player->list_available_players();
+
+        $weapons = function() use ($players) {
+            $v = [];
+            foreach($players as $player) {
+                $w = new stdClass();
+                $w->weapon_id = $player->weapon_id;
+                $w->weapon_name = $player->weapon_name;
+                $w->strike_force = $player->strike_force;
+                $w->defense = $player->defense;
+                $w->damage = $player->damage;
+                $v[] = $w;
+            }
+            return $v;
+        };
+
+        $this->render('game/admin/admin', [
+            'players' => $players,
+            'weapons' => $weapons()
+        ]);
+    }
+    
 }
