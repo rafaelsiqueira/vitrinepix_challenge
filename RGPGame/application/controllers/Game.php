@@ -18,12 +18,8 @@ class Game extends Custom_Controller {
         $this->render('game/start');
     }
 
-    public function initiative()
+    public function initiative($players)
     {
-        // load resources
-        $this->load->model('player', '', true);
-        $players = $this->player->list_available_players();
-
         do {
             $initiatives = array();
 
@@ -31,9 +27,9 @@ class Game extends Custom_Controller {
             foreach($players as $player) {
 
                 // keep the initiative number to use later
-                $initiative = $this->dice->next(range(1,20)) + $player->agility;
+                $initiative = $this->dice->next(range(1,20)) + $player->getAgility();
 
-                $player->initiative_point = $initiative;
+                $player->setInitiativePoint($initiative);
                 $initiatives[$initiative] = $player;
             }
 
@@ -44,17 +40,11 @@ class Game extends Custom_Controller {
         $first  = $initiatives[ max($sortedNumbers) ];
         $second = $initiatives[ min($sortedNumbers) ];
 
-        // save ordered players in session
-        $this->session->gamedata = ['players' => array($first, $second)];
-
-        print json_encode($this->session->gamedata['players']);
+        return [$first, $second];
     }
 
     public function attack()
     {
-        // prepare players to the fight!
-        $players = $this->preparePlayers();
-
         // keep track of rounds
         $rounds = array();
 
@@ -62,12 +52,19 @@ class Game extends Custom_Controller {
         $current_attacker = 0;
         $current_defender = 1;
 
+        // load resources
+        $this->load->model('player', '', true);
+        $availablePlayers = $this->preparePlayers($this->player->list_available_players());
+
         do {
+
+            // for each turn, run the initiative
+            $players = $this->initiative($availablePlayers);
 
             // prepare round data
             $round = [
-                'attacker' => $players[$current_attacker]->getName(),
-                'defender' => $players[$current_defender]->getName(),
+                'attacker' => $players[$current_attacker]->getName() . ' ('. $players[$current_attacker]->getInitiativePoint() .')',
+                'defender' => $players[$current_defender]->getName() . ' ('. $players[$current_defender]->getInitiativePoint() .')',
                 'attack' => [
                     'remaining_health' => $players[$current_defender]->getHealth()
                 ]
@@ -99,9 +96,9 @@ class Game extends Custom_Controller {
                 }
             }
 
-            // switch the attacker/defender
-            $current_attacker = (int) !$current_attacker;
-            $current_defender = (int) !$current_defender;
+//            // switch the attacker/defender
+//            $current_attacker = (int) !$current_attacker;
+//            $current_defender = (int) !$current_defender;
 
             // add to round's list
             $rounds[] = $round;
@@ -117,14 +114,14 @@ class Game extends Custom_Controller {
         $this->session->gamedata = array();
     }
 
-    private function preparePlayers()
+    private function preparePlayers($sortedPlayers)
     {
         $this->load->model('weapon', '', true);
         $this->load->model('player', '', true);
 
         $players = array();
 
-        foreach($this->session->gamedata['players'] as $p) {
+        foreach($sortedPlayers as $p) {
 
             $weapon = new Weapon();
             $weapon->setData([

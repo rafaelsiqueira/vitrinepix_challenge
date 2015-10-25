@@ -7,6 +7,8 @@ class Player extends Custom_Model {
     private $strength;
     private $agility;
 
+    private $initiative_point;
+
     private $weapon;
 
     public function __construct()
@@ -95,6 +97,22 @@ class Player extends Custom_Model {
     public function setAgility($agility)
     {
         $this->agility = $agility;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getInitiativePoint()
+    {
+        return $this->initiative_point;
+    }
+
+    /**
+     * @param mixed $initiative_point
+     */
+    public function setInitiativePoint($initiative_point)
+    {
+        $this->initiative_point = $initiative_point;
     }
 
     /**
