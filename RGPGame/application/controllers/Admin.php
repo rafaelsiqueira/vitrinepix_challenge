@@ -19,27 +19,17 @@ class Admin extends Custom_Controller {
     {
         $this->authenticationCheck();
 
-        // list available players
         $this->load->model('player', '', true);
-        $players = $this->player->list_available_players();
+        $this->load->model('weapon', '', true);
 
-        $weapons = function() use ($players) {
-            $v = [];
-            foreach($players as $player) {
-                $w = new stdClass();
-                $w->weapon_id = $player->weapon_id;
-                $w->weapon_name = $player->weapon_name;
-                $w->strike_force = $player->strike_force;
-                $w->defense = $player->defense;
-                $w->damage = $player->damage;
-                $v[] = $w;
-            }
-            return $v;
-        };
+        // list available players
+
+        $players = $this->player->list_available_players();
+        $weapons = $this->weapon->db->get('weapon')->result();
 
         $this->render('admin/admin', [
             'players' => $players,
-            'weapons' => $weapons()
+            'weapons' => $weapons
         ]);
     }
 
@@ -67,6 +57,40 @@ class Admin extends Custom_Controller {
         $this->render('admin/login', $data);
     }
 
+    public function create_player() {
+        $this->authenticationCheck();
+
+        $this->load->model('player', '', true);
+        $data = $this->input->post('player')['new'];
+
+        if(!isset($data['weapon_id']) || (int)$data['weapon_id'] <= 0) {
+            print json_encode(['success' => false, 'message' => 'Invalid weapon']);
+            exit;
+        }
+
+        if($this->player->create($data)) {
+            print json_encode(['success' => true]);
+
+        } else {
+            print json_encode(['success' => false, 'message' => 'Error when trying to create']);
+        }
+    }
+
+    public function delete_player() {
+        $this->authenticationCheck();
+
+        $this->load->model('player', '', true);
+
+        $id = $this->input->post('player_id');
+
+        if($this->player->delete($id)) {
+            print json_encode(['success' => true]);
+
+        } else {
+            print json_encode(['success' => false, 'message' => 'Error when trying to delete']);
+        }
+    }
+
     public function update_player()
     {
         $this->load->model('player', '', true);
@@ -76,6 +100,7 @@ class Admin extends Custom_Controller {
     public function update_weapon()
     {
         $this->load->model('weapon', '', true);
+
         $this->update('weapon', $this->weapon, function($data){
             if(!preg_match('/[0-9]+d[0-9]+/', $data['damage'])) {
                 print (json_encode(['success' => false, 'message' => 'Invalid damage']));

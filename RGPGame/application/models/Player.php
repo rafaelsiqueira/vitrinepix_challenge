@@ -24,11 +24,32 @@ class Player extends Custom_Model {
 
             . 'FROM '
 	        . '  player p '
-            . '  INNER JOIN player_weapon wp ON wp.player_id = p.id '
-            . '  INNER JOIN weapon w ON w.id = wp.weapon_id ';
+            . '  LEFT JOIN player_weapon wp ON wp.player_id = p.id '
+            . '  LEFT JOIN weapon w ON w.id = wp.weapon_id ';
 
         return $this->db->query($q)->result();
 
+    }
+
+    public function create($data) {
+        $weapon = $data['weapon_id'];
+        unset($data['weapon_id']);
+
+        $player_id = parent::create($data);
+
+        if($player_id > 0) {
+            return $this->db->insert('player_weapon', [
+                'player_id' => $player_id,
+                'weapon_id' => $weapon
+            ]);
+        }
+
+        return false;
+    }
+
+    public function delete($id) {
+        parent::delete($id);
+        return $this->db->delete('player_weapon', ['player_id' => $id]);
     }
 
     /**

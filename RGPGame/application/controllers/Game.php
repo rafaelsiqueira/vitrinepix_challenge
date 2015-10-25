@@ -15,7 +15,12 @@ class Game extends Custom_Controller {
     public function start()
     {
         $this->prepareNewGame();
-        $this->render('game/start');
+
+        $this->load->model('player', '', true);
+
+        $this->render('game/start', [
+            'total_players' => $this->player->db->count_all('player')
+        ]);
     }
 
     public function initiative($players)

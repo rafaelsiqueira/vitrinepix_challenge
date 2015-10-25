@@ -65,9 +65,40 @@
 
     var Admin = function() {
 
+
+        this.createPlayer = function(e) {
+            _execute('create', 'player', 'new')
+                .done(function(data){
+                    if(data.success) {
+                        window.location.reload();
+
+                    } else {
+                        $('#message-box').html('<div class="alert alert-danger" role="alert">'+ data.message +'</div>');
+                    }
+                }
+            );
+        };
+
+        this.deletePlayer = function(e) {
+            if(confirm('Are you sure?')) {
+                var request = $.post('/admin/delete_player', 'player_id=' + _playerId(e), null, 'json');
+                request.done(function (data) {
+                    if (data.success) {
+                        window.location.reload();
+
+                    } else {
+                        $('#message-box').html('<div class="alert alert-danger" role="alert">' + data.message + '</div>');
+                    }
+                });
+
+                request.fail(function () {
+                    $('#message-box').html('<div class="alert alert-danger" role="alert">Internal server error!</div>');
+                });
+            }
+        };
+
         this.updatePlayer = function(e) {
-            var playerId = $(e.target).data('item');
-            _update('player', playerId);
+            _update('player', _playerId(e));
         };
 
         this.updateWeapon = function(e) {
@@ -75,26 +106,39 @@
             _update('weapon', weaponId);
         };
 
-        function _update(item, itemId) {
+        function _playerId(e) {
+            return $(e.target).data('item');
+        }
 
+        function _update(item, itemId) {
+            _execute('update', item, itemId)
+                .done(function(data){
+                    if(data.success) {
+                        $('#message-box').html('<div class="alert alert-success" role="alert">Update success!</div>');
+                    } else {
+                        $('#message-box').html('<div class="alert alert-danger" role="alert">'+ data.message +'</div>');
+                    }
+                }
+            );
+        }
+
+        function _execute(action, item, itemId) {
             var payload  = [];
             $('#form-'+ item +' input[name^='+ item +'\\['+ itemId + '\\]]').each(function(i, el){
                 payload.push($(el).attr('name') + '=' + $(el).val());
             });
 
-            var request = $.post('/admin/update_' + item, payload.join('&'), null, 'json');
-            request.done(function(data){
-                console.log(data);
-                if(data.success) {
-                    $('#message-box').html('<div class="alert alert-success" role="alert">Update success!</div>');
-                } else {
-                    $('#message-box').html('<div class="alert alert-danger" role="alert">'+ data.message +'</div>');
-                }
+            $('#form-'+ item +' select[name^='+ item +'\\['+ itemId + '\\]]').each(function(i, el){
+                payload.push($(el).attr('name') + '=' + $(el).val());
             });
+
+            var request = $.post('/admin/'+ action + '_' + item, payload.join('&'), null, 'json');
 
             request.fail(function(){
                 $('#message-box').html('<div class="alert alert-danger" role="alert">Internal server error!</div>');
             });
+
+            return request;
         }
     };
 
@@ -117,7 +161,7 @@
 
             if($('#available-players').length > 0) {
                 $('#available-players button').each(function(index, elem){
-                    $(elem).click(admin.updatePlayer);
+                    $(elem).click(admin[ $(elem).data('action') + 'Player' ]);
                 });
             }
 
