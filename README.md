@@ -10,7 +10,7 @@
 
 ## ADMIN ##
  
-* Password: ```1234``
+* Password: ```1234```
 
 ## REASONS WHY ##
 
