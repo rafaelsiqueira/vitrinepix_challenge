@@ -31,8 +31,8 @@ Example:
 The Human was the initiative's winner. He starts the attack.
 After that, the Orc attacks the Human and so on;
 
-Human > Orc
-Orc > Human
+- Human > Orc
+- Orc > Human
 
 Until someone's health end.
 
@@ -50,9 +50,9 @@ After the attack, the initiative step will be executed again, to know who is the
 
 In this scenario, we can see the following behavior:
 
-Human > Orc
-Human > Orc
-Orc > Human
-Human > Orc
+- Human > Orc
+- Human > Orc
+- Orc > Human
+- Human > Orc
 
 Until someone's health end.
